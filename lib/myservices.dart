@@ -4,6 +4,7 @@ import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:myapp/googlemaps.dart';
 import 'package:myapp/models/Blog.dart';
+import 'models/Service.dart';
 import 'package:myapp/servicedetails.dart';
 
 class MyServiceList extends StatelessWidget {
@@ -23,8 +24,8 @@ class MyServiceList extends StatelessWidget {
           ),
           //
           Expanded(
-            child: StreamBuilder<QuerySnapshot<Blog>>(
-              stream: Amplify.DataStore.observeQuery(Blog.classType),
+            child: StreamBuilder<QuerySnapshot<Service>>(
+              stream: Amplify.DataStore.observeQuery(Service.classType),
               builder:((context, snapshot) {
                 if(snapshot.data == null){
                 return const Center(
@@ -49,6 +50,7 @@ class MyServiceList extends StatelessWidget {
                           },
                           child: ListTile(
                               title: Text(snapshot.data!.items[index].name),
+                              subtitle: Text("Position: ${snapshot.data!.items[index].servicelat.toString()}, ${snapshot.data!.items[index].servicelong.toString()}"),
                             ),
                         );
                       }

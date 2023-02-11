@@ -4,11 +4,14 @@ import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import "package:dart_amqp/dart_amqp.dart";
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:myapp/models/ModelProvider.dart';
 import 'package:myapp/requests.dart';
 import 'package:myapp/servicesreq.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:flutter/widgets.dart';
+import 'dart:convert';
+import 'dblite.dart' as db;
 
 
 //constantes de conexion
@@ -49,8 +52,11 @@ static Future getDelivery() async {
                 Rabbitmq()._showNotification(event.payloadAsString,"shrimp.rmq.cloudamqp.com");
 
                 final blog = Blog(name: event.payloadAsString);
-                
+                final serviceInfo = db.Message.fromJson(jsonDecode(event.payloadAsString));
+                //Amplify.DataStore.save(Position(latitude: serviceInfo.latitude, longitude: serviceInfo.longitude));
+                final newService = Service(name: serviceInfo.destino, rbmqchanel: "rbmqchanel", servicelat: serviceInfo.latitude,servicelong: serviceInfo.longitude);
                 Amplify.DataStore.save(blog);
+                Amplify.DataStore.save(newService);
                 
                 Rabbitmq._saveServiceRequestToStorage(event.payloadAsString);
             }).onError((e,s){

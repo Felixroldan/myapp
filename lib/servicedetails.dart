@@ -7,28 +7,29 @@ import 'dart:convert' show json, base64, ascii;
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:myapp/dblite.dart';
+import 'package:myapp/dblite.dart' as db;
 import 'package:myapp/models/Blog.dart';
 import 'googlemaps.dart';
 import 'home.dart';
 import 'models/Blog.dart';
+import 'models/Service.dart';
 import 'dart:convert';
 
 class ServiceDetails extends StatefulWidget {
   ServiceDetails(this.serviceId);
-  final BlogModelIdentifier serviceId;
+  final ServiceModelIdentifier serviceId;
   @override
   _ServiceState createState() => _ServiceState(serviceId);
 }
 
 class _ServiceState extends State<ServiceDetails> {
-  String fullMessage = '';
+  Service serviceObj = Service(name:"Destino", servicelat:0, servicelong: 0, rbmqchanel:"null");
  
   _ServiceState(this.serviceId){
         readItemFromDatabase(serviceId);
         }
   
-   BlogModelIdentifier serviceId = BlogModelIdentifier(id: '0');
+   ServiceModelIdentifier serviceId = ServiceModelIdentifier(id: '0');
    Future<Position>? _currentPosition;
    Position? _actualPosition;
    String? _currentAddress;
@@ -131,25 +132,25 @@ _getAddressFromLatLng(Position _currentPosition) async {
           
                 
   );
-  Future<void> readItemFromDatabase(BlogModelIdentifier modelIdentifier) async {
-  await Amplify.DataStore.query(Blog.classType, where: Blog.MODEL_IDENTIFIER.eq(modelIdentifier))
+  Future<void> readItemFromDatabase(ServiceModelIdentifier modelIdentifier) async {
+  await Amplify.DataStore.query(Service.classType, where: Service.MODEL_IDENTIFIER.eq(modelIdentifier))
     .then((value) {
       print('Blog: $value.name');
       setState(() {
-          fullMessage = value[0].name;
+          serviceObj = value[0];
         });
     }).onError((error, stackTrace)  {
     print('Query failed: $error');
   });
 }
   Container ServiceDetailView() {
-    Message msgObj = Message("destino", 0, 0);
+    /*db.Message msgObj = db.Message("destino", 0, 0);
     print(fullMessage);
     try {
-      msgObj = Message.fromJson(jsonDecode(fullMessage));
+      msgObj = db.Message.fromJson(jsonDecode(fullMessage));
     } catch (e) {
       print(e.toString());
-    }
+    }*/
     return Container(
           alignment: Alignment.center,
           padding: const EdgeInsets.all(10),
@@ -165,8 +166,8 @@ _getAddressFromLatLng(Position _currentPosition) async {
                     builder: (context) {
                       return Card(
                           child: ListTile(
-                              title: Text("Destino: ${msgObj.Destino}"),
-                              subtitle: Text(msgObj.getLatLongAsString()),
+                              title: Text("Destino: ${serviceObj.name}"),
+                              subtitle: Text("Latitude: ${serviceObj.servicelat.toString()}, Longitude: ${serviceObj.servicelong.toString()}"),
                               leading: CircleAvatar(),
                               trailing: Icon(Icons.star)),
                               
@@ -257,30 +258,7 @@ _getAddressFromLatLng(Position _currentPosition) async {
   }         
 
 }
-class Message {
-   final String destino;
-   final double longitude;
-   final double latitude;
 
-   Message(this.destino,this.latitude,this.longitude);
-
-   String get Destino{
-    return destino;
-   }
-
-  LatLng getLatLng(){
-    return LatLng(latitude,longitude);
-   }
-  
-  String getLatLongAsString(){
-    return latitude.toString()+","+longitude.toString();
-  }
-
-  Message.fromJson(Map<String, dynamic> jsonMsg)
-      : destino = jsonMsg['name'],
-        latitude= double.parse(jsonMsg['latitude']),
-        longitude = double.parse(jsonMsg['longitude']);
-}
   
   /*Container FlightDetailsView() {
     return Container(

@@ -206,3 +206,28 @@ class Service {
     return _destino;
   }
 }
+
+class Message {
+   final String destino;
+   final double longitude;
+   final double latitude;
+
+   Message(this.destino,this.latitude,this.longitude);
+
+   String get Destino{
+    return destino;
+   }
+
+  LatLng getLatLng(){
+    return LatLng(latitude,longitude);
+   }
+  
+  String getLatLongAsString(){
+    return latitude.toString()+","+longitude.toString();
+  }
+
+  Message.fromJson(Map<String, dynamic> jsonMsg)
+      : destino = jsonMsg['name'],
+        latitude= double.parse(jsonMsg['latitude']),
+        longitude = double.parse(jsonMsg['longitude']);
+}

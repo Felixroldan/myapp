@@ -20,3 +20,38 @@ type Comment @model {
   post: Post @belongsTo
   content: String!
 }
+#Aqui empieza lo bueno.
+
+type Position @model{
+  id:ID!
+  latitude: Float!
+  longitude: Float!
+  #service: [Service] @hasMany
+  #response: [ServiceResponse] @hasMany
+}
+
+type Service @model {
+  id: ID!
+  #destino: Position @belongsTo
+  servicelat:Float!
+  servicelong:Float!
+  name: String!
+  description: String
+  rbmqchanel: String!
+  response: [ServiceResponse] @hasMany
+}
+
+type Provider @model{
+  id:ID!
+  name:String!
+  response: [ServiceResponse] @hasMany 
+}
+
+type ServiceResponse @model {
+  id: ID!
+  serviceprovider: Provider @belongsTo
+  service: Service @belongsTo
+  #localizacion: Position @belongsTo
+  providerlat: Float!
+  providerlong:Float!
+}
