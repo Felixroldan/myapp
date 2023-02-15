@@ -1,10 +1,18 @@
 # myapp
 
-A new Flutter project.
+A Flutter project. For interacting with a transport service 
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+Interacting with:
+Flutter secure storage 
+RabittMQ
+Google Maps 
+AWS Auth cognito 
+AWS storage amplify 
+AWS api amplify 
+Local notifications and awesome notifications. 
+
 
 A few resources to get you started if this is your first Flutter project:
 
