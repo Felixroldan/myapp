@@ -32,6 +32,7 @@ class Provider extends Model {
   final String id;
   final String? _name;
   final List<ServiceResponse>? _response;
+  final List<ServiceReport>? _report;
   final TemporalDateTime? _createdAt;
   final TemporalDateTime? _updatedAt;
 
@@ -65,6 +66,10 @@ class Provider extends Model {
     return _response;
   }
   
+  List<ServiceReport>? get report {
+    return _report;
+  }
+  
   TemporalDateTime? get createdAt {
     return _createdAt;
   }
@@ -73,13 +78,14 @@ class Provider extends Model {
     return _updatedAt;
   }
   
-  const Provider._internal({required this.id, required name, response, createdAt, updatedAt}): _name = name, _response = response, _createdAt = createdAt, _updatedAt = updatedAt;
+  const Provider._internal({required this.id, required name, response, report, createdAt, updatedAt}): _name = name, _response = response, _report = report, _createdAt = createdAt, _updatedAt = updatedAt;
   
-  factory Provider({String? id, required String name, List<ServiceResponse>? response}) {
+  factory Provider({String? id, required String name, List<ServiceResponse>? response, List<ServiceReport>? report}) {
     return Provider._internal(
       id: id == null ? UUID.getUUID() : id,
       name: name,
-      response: response != null ? List<ServiceResponse>.unmodifiable(response) : response);
+      response: response != null ? List<ServiceResponse>.unmodifiable(response) : response,
+      report: report != null ? List<ServiceReport>.unmodifiable(report) : report);
   }
   
   bool equals(Object other) {
@@ -92,7 +98,8 @@ class Provider extends Model {
     return other is Provider &&
       id == other.id &&
       _name == other._name &&
-      DeepCollectionEquality().equals(_response, other._response);
+      DeepCollectionEquality().equals(_response, other._response) &&
+      DeepCollectionEquality().equals(_report, other._report);
   }
   
   @override
@@ -112,11 +119,12 @@ class Provider extends Model {
     return buffer.toString();
   }
   
-  Provider copyWith({String? name, List<ServiceResponse>? response}) {
+  Provider copyWith({String? name, List<ServiceResponse>? response, List<ServiceReport>? report}) {
     return Provider._internal(
       id: id,
       name: name ?? this.name,
-      response: response ?? this.response);
+      response: response ?? this.response,
+      report: report ?? this.report);
   }
   
   Provider.fromJson(Map<String, dynamic> json)  
@@ -128,15 +136,21 @@ class Provider extends Model {
           .map((e) => ServiceResponse.fromJson(new Map<String, dynamic>.from(e['serializedData'])))
           .toList()
         : null,
+      _report = json['report'] is List
+        ? (json['report'] as List)
+          .where((e) => e?['serializedData'] != null)
+          .map((e) => ServiceReport.fromJson(new Map<String, dynamic>.from(e['serializedData'])))
+          .toList()
+        : null,
       _createdAt = json['createdAt'] != null ? TemporalDateTime.fromString(json['createdAt']) : null,
       _updatedAt = json['updatedAt'] != null ? TemporalDateTime.fromString(json['updatedAt']) : null;
   
   Map<String, dynamic> toJson() => {
-    'id': id, 'name': _name, 'response': _response?.map((ServiceResponse? e) => e?.toJson()).toList(), 'createdAt': _createdAt?.format(), 'updatedAt': _updatedAt?.format()
+    'id': id, 'name': _name, 'response': _response?.map((ServiceResponse? e) => e?.toJson()).toList(), 'report': _report?.map((ServiceReport? e) => e?.toJson()).toList(), 'createdAt': _createdAt?.format(), 'updatedAt': _updatedAt?.format()
   };
   
   Map<String, Object?> toMap() => {
-    'id': id, 'name': _name, 'response': _response, 'createdAt': _createdAt, 'updatedAt': _updatedAt
+    'id': id, 'name': _name, 'response': _response, 'report': _report, 'createdAt': _createdAt, 'updatedAt': _updatedAt
   };
 
   static final QueryModelIdentifier<ProviderModelIdentifier> MODEL_IDENTIFIER = QueryModelIdentifier<ProviderModelIdentifier>();
@@ -145,9 +159,23 @@ class Provider extends Model {
   static final QueryField RESPONSE = QueryField(
     fieldName: "response",
     fieldType: ModelFieldType(ModelFieldTypeEnum.model, ofModelName: 'ServiceResponse'));
+  static final QueryField REPORT = QueryField(
+    fieldName: "report",
+    fieldType: ModelFieldType(ModelFieldTypeEnum.model, ofModelName: 'ServiceReport'));
   static var schema = Model.defineSchema(define: (ModelSchemaDefinition modelSchemaDefinition) {
     modelSchemaDefinition.name = "Provider";
     modelSchemaDefinition.pluralName = "Providers";
+    
+    modelSchemaDefinition.authRules = [
+      AuthRule(
+        authStrategy: AuthStrategy.PUBLIC,
+        operations: [
+          ModelOperation.CREATE,
+          ModelOperation.UPDATE,
+          ModelOperation.DELETE,
+          ModelOperation.READ
+        ])
+    ];
     
     modelSchemaDefinition.addField(ModelFieldDefinition.id());
     
@@ -162,6 +190,13 @@ class Provider extends Model {
       isRequired: false,
       ofModelName: 'ServiceResponse',
       associatedKey: ServiceResponse.SERVICEPROVIDER
+    ));
+    
+    modelSchemaDefinition.addField(ModelFieldDefinition.hasMany(
+      key: Provider.REPORT,
+      isRequired: false,
+      ofModelName: 'ServiceReport',
+      associatedKey: ServiceReport.SERVICEPROVIDER
     ));
     
     modelSchemaDefinition.addField(ModelFieldDefinition.nonQueryField(
